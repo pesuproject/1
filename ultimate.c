@@ -244,15 +244,13 @@ int existc(char new[11])
     int count = 0;
     if ( file != NULL )
     {   
-        char lne[256]; /* or other suitable maximum line size */
-        while (fgets(lne, sizeof lne, file) != NULL) /* read a line */
+        char lne[256];
+        while (fgets(lne, sizeof lne, file) != NULL)
         {   
             if (count == line)
             {   
-                //use line or in a function return it
-                //            //in case of a return first close the file with "fclose(file);"
-            printf("\t%s\n", lne);
-            fclose(file);
+            	printf("\t%s\n", lne);
+            	fclose(file);
             }   
             else{
                 count++;}   

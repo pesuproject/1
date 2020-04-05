@@ -11,8 +11,11 @@ void editc();
 int existc();
 void createi();
 int existi(char new[11]);
-int indexOfi(FILE *fptr, char *n,int *line, int *col);
+int indexOfi(FILE *fptr,char *n,int *line, int *col);
 void updi();
+void iname(int line);
+void iquan(int line);
+void iprice(int line);
 struct custo
 {
 	char mobileno[51];
@@ -23,7 +26,7 @@ struct item
 	char productno[8];
 	char productname[10];
 	int quantity;
-	int price;
+	float price;
 }
 item;
 int main()
@@ -131,8 +134,8 @@ void createc()
 	            scanf("%s",custo.customername);
 	            printf("\n");
     	        fprintf(fp,"\n%s|%s",custo.mobileno,custo.customername);
-                printf("\tCustomer Record is Created\n\n");           
-        case 2:printf("\tCustomer Already Exists\n");        
+                printf("\tCustomer Record is Created\n\n");break;           
+        case 2:printf("\tCustomer Already Exists\n");break;        
     }}
 	fclose(fp);
 	
@@ -149,6 +152,7 @@ int exist(char new[11])
         exit(EXIT_FAILURE);
     }
     indexOf(fptr, new, &line, &col);
+    printf("%d",line);
     fclose(fptr);
     if (line == -1){
         return 1;}
@@ -189,10 +193,12 @@ void editc(){
         strcpy(new,&custo.mobileno);
         switch(exist(new)){
 	    case 1 : printf("\tNo account exist.\n\tDo you want to create new??\n");
+               printf("\t----------------------------\n");
                 printf("\tPlease Select an Option: \n");
+               printf("\t----------------------------\n");
                 printf("\t1.YES\n");
                 printf("\t2.NO\n");
-                printf("\tPlease Enter an Option: \n");
+                printf("\tPlease Enter an Option: ");
                 scanf("%d",&yn);
                 switch (yn)
                 {
@@ -201,7 +207,7 @@ void editc(){
                 
                 default:
                     break;
-                }
+                }break;
         case 2: printf("\tDisplaying Details\n");
                 printf("\tMobile__No|Customer___Name\n");
                 existc(new);    
@@ -248,9 +254,9 @@ int existc(char new[11])
         while (fgets(lne, sizeof lne, file) != NULL)
         {   
             if (count == line)
-            {   
-            	printf("\t%s\n", lne);
-            	fclose(file);
+            {
+                printf("\t%s\n", lne);
+                fclose(file);
             }   
             else{
                 count++;}   
@@ -281,31 +287,43 @@ int indexOf2(FILE *fptr, const char *NEW, int *line, int *col)
 }
 
 void createi()
-{	int in=0,i=0,ynn=0;char newi[8];
-	FILE *fp;
-	fp=fopen("ITEMS.txt","a");
-    if(fp==NULL)
+{	int in=0,ynn=0;char newi[8];
+	FILE *fp,*fp2,*fp3,*fp4;
+	fp=fopen("INUM.txt","a");
+	if(fp==NULL)
 	{
 		printf("Error\n");
-	}
+	}else{
+    fclose(fp);
 	printf("\n");
 	printf("\tEnter Product Code(7-digit): ");
-	scanf("%s",&item.productno);
-    strcmp(newi,item.productno);
+	scanf("%s",item.productno);
+    strcpy(newi,item.productno);
     switch (existi(newi))
     {
-    case 1:printf("\tEnter Product Name: ");
+    case 1 :fp2=fopen("INAME.txt","a");
+	    fp=fopen("INUM.txt","a");
+	    fp3=fopen("IQ.txt","a");
+	    fp4=fopen("IP.txt","a");
+        printf("\tEnter Product Name: ");
 	    scanf("%s",item.productname);
 	    printf("\tEnter Quantity: ");
 	    scanf("%d",&item.quantity);
 	    printf("\tEnter Price: ");
-	    scanf("%d",&item.price);
+	    scanf("%f",&item.price);
 	    printf("\n");
-	    i++;
-	    fprintf(fp,"\n%d|%s|%d|%d",item.productno,item.productname,item.quantity,item.price);
+	    fprintf(fp,"%s\n",item.productno);
+	    fprintf(fp2,"%s\n",item.productname);
+	    fprintf(fp3,"%d\n",item.quantity);
+	    fprintf(fp4,"%.2f\n",item.price);
     	printf("\tRecord is Created\n\n");
+        fclose(fp);
+        fclose(fp2);
+	    fclose(fp3);
+	    fclose(fp4);
         break;
     case 2 :  printf("\tITEM EXIST,DO YOU WANT TO UPDATE THE STOCK:\n");
+              printf("\t----------------------------\n");
               printf("\t1.YES\n");  
               printf("\t2.NO\n");
               printf("\tENTER your Choice: ");
@@ -313,7 +331,7 @@ void createi()
               switch (ynn)
               {
               case 1:
-                    updi();  
+                    updi(newi);  
                     printf("\tRecord is Updated\n\n");
                   break;
               case 2:break;
@@ -322,29 +340,28 @@ void createi()
               }
          break; 
     default:
-        break;}
-	fclose(fp);
+        break;}}
 }
 int existi(char newi[8])
 {
     FILE *fptr;
     int line, col;
-    fptr = fopen("ITEMS.txt", "r");
+    fptr = fopen("INUM.txt", "r");
     if (fptr == NULL)
     {
-        printf("Unable to open file.\n");
+        printf("Unable to process.\n");
         printf("SORRY for the Inconvenience\n");
         exit(EXIT_FAILURE);
     }
     indexOfi(fptr, newi, &line, &col);
     fclose(fptr);
-    if (line == -1){
+    if (line==-1){
         return 1;}
     else{
         return 2;}
         
 }
-int indexOfi(FILE *fptr, char *newi,int *line, int *col)
+int indexOfi(FILE *fptr,char *newi,int *line, int *col)
 {
     char str[1000];
     char *pos;
@@ -365,55 +382,41 @@ int indexOfi(FILE *fptr, char *newi,int *line, int *col)
 }
 void updi(char newi[8])
 {
-    FILE *fptr;
-    int line, col;
-    fptr = fopen("ITEMS.txt", "r");
-              printf("\tq1\n");  
+    FILE *fptr,*fptr2,*fptr3,*fptr4;
+    int line, col,y3;
+    fptr=fopen("INUM.txt","r");
+	//fptr2=fopen("INAME.txt","a");
+	//fptr3=fopen("IQ.txt","a");
+	//fptr4=fopen("IP.txt","a");
     if (fptr == NULL)
     {
         printf("Unable to open file.\n");
         printf("SORRY for the Inconvenience\n");
         exit(EXIT_FAILURE);
     }
-    indexOfi(fptr, newi, &line, &col);
+    indexOfi2(fptr, newi, &line, &col);
     fclose(fptr);
-    FILE *fileptr1, *fileptr2;
-    char filechar[40]="ITEMS.txt";
-    char c;
-    int delete_line=line, temp = 1;
- 	fileptr1 = fopen(filechar, "r");
-    rewind(fileptr1);
-    fileptr2 = fopen("replicai.txt", "w");
-    c = getc(fileptr1);
-    while (c != EOF)
+    line=line+1;
+    printf("\t----------------------------\n");
+    printf("\tPLEASE SELECT THE TYPE YOU WANT TO UPDATE:\n");
+    printf("\t----------------------------\n");
+    printf("\t1.NAME\n");  
+    printf("\t2.QUANTITY\n");
+    printf("\t3.PRICE\n");
+    printf("\tENTER your Choice: ");
+    scanf("%d",&y3);
+    switch (y3)
     {
-        if (c == 'n')
-        {
-            temp++;
-        }
-        if (temp != delete_line)
-        {
-            putc(c, fileptr2);
-        }
-        else
-        {
-            while ((c = getc(fileptr1)) != 'n')
-            {
-            }
-            printf("Enter updated version of item_num(7)|name|present-quan|price(if updated)");
-            fflush(stdin);
-            putc('n', fileptr2);
-            while ((c = getchar()) != 'n')
-                putc(c, fileptr2);
-            fputs("n", fileptr2);
-            temp++;
-        }
-        c = getc(fileptr1);
+    case 1: iname(line);
+        break;
+    case 2: iquan(line);
+        break;
+    case 3: iprice(line);
+        break;
+    default:
+        break;
     }
-    fclose(fileptr1);
-    fclose(fileptr2);
-    remove(filechar);
-    rename("replicai.txt", filechar);
+    
 }
 int indexOfi2(FILE *fptr, char *newi,int *line, int *col)
 {
@@ -432,5 +435,146 @@ int indexOfi2(FILE *fptr, char *newi,int *line, int *col)
     }
     if (*col == -1){
         *line = -1;}
-    return *col;
+    return *col,*line;
+}
+void iname(int line)
+{
+    char s[1000],f[100]="INAME.txt",c;
+    FILE *fptr, *f1ptr;
+    int d=line,temp=1;
+    fptr=fopen(f,"r");
+    f1ptr=fopen("temp.txt","w");
+    printf("\tEnter Name to be replaced with: ");
+    scanf("%s",s);
+    while((c=getc(fptr))!=EOF){
+        if(c=='\n'){
+            temp++;
+            putc(c,f1ptr);}
+        else if(temp==d){
+            fputs(s,f1ptr);
+            while((c=getc(fptr))!='\n');
+            putc(c,f1ptr);
+            temp++;}
+        else if (temp!=d){
+            putc(c,f1ptr);
+        }
+    }
+    fclose(fptr);
+    fclose(f1ptr);
+    char ch, source_file[20]="temp.txt", target_file[20]="INAME.txt";
+    FILE *source, *target;
+    source = fopen(source_file, "r");
+    if( source == NULL )
+    {
+      printf("\t\t\t\tNOT UPDATED...\n");
+      exit(EXIT_FAILURE);
+   }
+    target = fopen(target_file, "w");
+ 
+   if( target == NULL )
+   {
+      fclose(source);
+      printf("\t\t\t\tNOT UPDATED...\n");
+      exit(EXIT_FAILURE);
+   }
+   else{ while( ( ch = fgetc(source) ) != EOF )
+      fputc(ch, target);
+   printf("\n\tITEM NAME UPDATED SUCCESSFULLY.\n");}
+   fclose(source);
+   fclose(target);
+   remove("temp.txt");
+}
+void iquan(int line)
+{
+    char s[1000],f[100]="IQ.txt",c;
+    FILE *fptr, *f1ptr;
+    int d=line,temp=1;
+    fptr=fopen(f,"r");
+    f1ptr=fopen("temp.txt","w");
+    printf("\tEnter Quantity to be updated: ");
+    scanf("%s",s);
+    while((c=getc(fptr))!=EOF){
+        if(c=='\n'){
+            temp++;
+            putc(c,f1ptr);}
+        else if(temp==d){
+            fputs(s,f1ptr);
+            while((c=getc(fptr))!='\n');
+            putc(c,f1ptr);
+            temp++;}
+        else if (temp!=d){
+            putc(c,f1ptr);
+        }
+    }
+    fclose(fptr);
+    fclose(f1ptr);
+    char ch, source_file[20]="temp.txt", target_file[20]="IQ.txt";
+    FILE *source, *target;
+    source = fopen(source_file, "r");
+    if( source == NULL )
+    {
+      printf("\t\t\t\tNOT UPDATED...\n");
+      exit(EXIT_FAILURE);
+   }
+    target = fopen(target_file, "w");
+ 
+   if( target == NULL )
+   {
+      fclose(source);
+      printf("\t\t\t\tNOT UPDATED...\n");
+      exit(EXIT_FAILURE);
+   }
+   else{ while( ( ch = fgetc(source) ) != EOF )
+      fputc(ch, target);
+   printf("\n\tITEM NAME UPDATED SUCCESSFULLY.\n");}
+   fclose(source);
+   fclose(target);
+   remove("temp.txt");
+}
+void iprice(int line)
+{
+    char s[1000],f[100]="IP.txt",c;
+    FILE *fptr, *f1ptr;
+    int d=line,temp=1;
+    fptr=fopen(f,"r");
+    f1ptr=fopen("temp.txt","w");
+    printf("\tEnter Price to be updated with: ");
+    scanf("%s",s);
+    while((c=getc(fptr))!=EOF){
+        if(c=='\n'){
+            temp++;
+            putc(c,f1ptr);}
+        else if(temp==d){
+            fputs(s,f1ptr);
+            while((c=getc(fptr))!='\n');
+            putc(c,f1ptr);
+            temp++;}
+        else if (temp!=d){
+            putc(c,f1ptr);
+        }
+    }
+    fclose(fptr);
+    fclose(f1ptr);
+    char ch, source_file[20]="temp.txt", target_file[20]="IP.txt";
+    FILE *source, *target;
+    source = fopen(source_file, "r");
+    if( source == NULL )
+    {
+      printf("\t\t\t\tNOT UPDATED...................\n");
+      exit(EXIT_FAILURE);
+   }
+    target = fopen(target_file, "w");
+ 
+   if( target == NULL )
+   {
+      fclose(source);
+      printf("\t\t\t\tNOT UPDATED................\n");
+      exit(EXIT_FAILURE);
+   }
+   else{ while( ( ch = fgetc(source) ) != EOF )
+      fputc(ch, target);
+   printf("\n\tITEM NAME UPDATED SUCCESSFULLY..............\n");}
+   fclose(source);
+   fclose(target);
+   remove("temp.txt");
 }
